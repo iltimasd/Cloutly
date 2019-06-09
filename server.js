@@ -15,19 +15,68 @@ const db = new Discogs('CloutlyGlitchProto/1.0', {
 
 // db.getArtist(159840, function(err, data){
 // 	console.log(data);
+function getAutofillList(input){
+   return new Promise(function(resolve,rej){
+      db.search(input,{type:'artist', per_page: 5 },function(err,data){
+
+        resolve(data.results.map((item)=>(
+          {
+            artist:item.title,
+            id:item.id,
+            img:item.cover_image
+          }
+        )
+                                    ))
+      }
+               )
+   })
+}
+
+function getSearchList(input){
+   return new Promise(function(resolve,rej){
+      db.search(input,{type:'artist', per_page: 15 },function(err,data){
+         resolve(data.results.map((item)=>(
+          {
+            artist:item.title,
+            id:item.id,
+            img:item.cover_image
+          }
+        )
+                                    ))
+      }
+      )
+   })
+}
+
+function getInput(){}
+
+getAutofillList('nirv').then(data=>console.log(data))
+
 function getBandMembers(input){
-db.search(input,{type:'artist'},function(err,data){
+  return new Promise(function(resolve,rej){
+    db.search(input,{type:'artist'},function(err,data){
   //console.log('search',data.results[0]);
   let id= data.results[0].id;
   db.getArtist(id,function(err,data){
-    console.log(data.members)
-    return data.members
+    console.log(data)
+    resolve(data.members)
     
   })
 })
-}
+  })
 
-console.log(getBandMembers('nirvana'))
+}
+/*
+getBandMembers('hot chip').then(function(memberArr){
+  console.log('promise',memberArr)
+  for(let obj in memberArr){
+    
+  }
+})
+*/
+
+
+//console.log(getBandMembers('nirvana'))
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
