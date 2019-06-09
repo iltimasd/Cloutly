@@ -20,29 +20,29 @@
     <!-- import the webpage's stylesheet -->
     <link rel="stylesheet" href="/style.css">
     
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
     <!-- import the webpage's client-side javascript file -->
     <script src="/client.js" defer></script>
+
   </head>
   <body>
     <header>
       <h1>
-        A Dream of the Future
+        These Chains Prototype
       </h1>
     </header>
 
     <main>
-      <p class="bold">Oh hi,</p>
-      
-      <p>Tell me your hopes and dreams:</p>
+
       
       <form>
-        <input name="dream" type="text" maxlength="100" placeholder="Dreams!" aria-labelledby="submit-dream">
-        <button type="submit" id="submit-dream">Submit Dream</button>
+        <input class="search" name="artist" type="text" maxlength="100" placeholder="Enter Artist" aria-labelledby="submit-artist">
+        <button type="submit" id="submit-dream">Search Artist</button>
       </form>
+      <div class="results">
       
-      <section class="draams">
-        <ul id="dreams"></ul>
-      </section>
+      </div>
     </main>
 
     <footer>
@@ -53,6 +53,10 @@
           to make it easier for folks to view source and remix -->
     <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
     <script src="https://button.glitch.me/button.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+    <script>
+        
 
+</script>
   </body>
 </html>

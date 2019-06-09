@@ -12,7 +12,7 @@
   "dependencies": {
     "disconnect": "^1.2.1",
     "express": "^4.16.4",
-    "websocket": "^1.0.28"
+    "socket.io": "^2.2.0"
   },
   "engines": {
     "node": "8.x"
