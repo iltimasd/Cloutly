@@ -12,7 +12,8 @@
   "dependencies": {
     "disconnect": "^1.2.1",
     "express": "^4.16.4",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "bottleneck":"^2.19.1"
   },
   "engines": {
     "node": "8.x"
