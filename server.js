@@ -8,7 +8,8 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const Bottleneck = require('bottleneck')
 const limit = new Bottleneck({
-    minTime:1000
+    minTime:1000,
+  maxConcurrent: 1
 })
 const Discogs = require('disconnect').Client;
 // we've started you off with Express, 
@@ -19,21 +20,16 @@ const db = new Discogs('TheseChainsProto/1.0', {
     consumerSecret: process.env.DSECRET
 }).database();
 
-// db.getArtist(159840, function(err, data){
-// 	console.log(data);
-
-function getAutofillList(input){
+const getAutofillList=limit.wrap(getAutofillListWrapped)
+function getAutofillListWrapped(input){
     return new Promise(function(resolve,rej){
         db.search(input,{type:'artist', per_page: 5 },function(err,data){
-            
-            resolve(data.results.map((item)=>(
-                {
+          resolve(data.results.map((item)=>({
                     artist:item.title,
                     id:item.id,
                     img:item.cover_image
-                }
-                )
-                ))
+                })
+              ))
             })
         })
     }
@@ -41,19 +37,17 @@ function getAutofillList(input){
     function getSearchList(input){
         return new Promise(function(resolve,rej){
             db.search(input,{type:'artist', per_page: 15 },function(err,data){
-                resolve(data.results.map((item)=>(
-                    {
+                resolve(data.results.map((item)=>({
                         artist:item.title,
                         id:item.id,
                         img:item.cover_image
-                    }
-                    )
+                    })
                     ))
                 })
             })
         }
-        
-        function getInfo(id){
+        const getInfo=limit.wrap(getInfoWrapped)
+        function getInfoWrapped(id){
             return new Promise(function(resolve,rej){
                 db.getArtist(id,function(err,data){
                     resolve(data)
@@ -61,21 +55,26 @@ function getAutofillList(input){
             })
         }
         
-        
         //this gets info from the band JSON
         // notes
         // this is a single call for basic info
         // this most likely is information that was called earlier?
         // could retrieve more complex data by passing data.members.id into getInfo()
-        function getBandMembers(id){
+        const getBandMembers=limit.wrap(getBandMembersWrapped)
+        function getBandMembersWrapped(id,socket){
             return new Promise(function(resolve,rej){
                 db.getArtist(id,function(err,data){
-                    resolve(data.members)
+                    console.log('found the band',data.name,'with',data.members.length,'band members')
+                 
+                 socket.emit('mssg','Processing the band ' + data.name + ' with ' + data.members.length + ' band members '); 
+                
+                  resolve(data.members)
                 })
             })
-        }
-        
-        function getBands(id){
+        }        
+
+        const getBands=limit.wrap(getBandsWrapped)
+        function getBandsWrapped(id){
             return new Promise(function(resolve,rej){
                 db.getArtist(id,function(err,data){
                     resolve(data.groups)
@@ -103,7 +102,8 @@ function getAutofillList(input){
                     return {"source":arr[0].id,"target":node.id}
                 }).splice(1)
             })
-            return [].concat(...edges)
+            let arr = [].concat(...edges)
+            return arr
         }
         
         function buildNodes(inputData){
@@ -113,20 +113,23 @@ function getAutofillList(input){
                 return tempArr.find(a => a.id === id)
             })
             
+          for(let i=0;i<uniqueNodes.length;i++){
+            uniqueNodes[i].group = uniqueNodes[i].hasOwnProperty('members') ? 1 : 0
+          }
             return uniqueNodes
         }
+
+
         
-        function getConnectionsFromPerson(id){
+        function getConnectionsFromPerson(id,socket){
             return getBands(id)
             .then(function(bands){
-                console.log(bands)
+                console.log('found band memmber in',bands.length-1, 'other bands')
+                 socket.emit('mssg','Processing band member in ' + (bands.length-1) + ' other bands'); 
+                socket.emit('addTime',bands.length)
                 let ids=bands.map(band=>band.id)
-                console.log(ids)
-                //below might be redundant
-                let bandMemberPromises = ids.map(id=>getBandMembers(id))
-                //console.log(bandMemberPromises)
+                let bandMemberPromises = ids.map(id=>getBandMembers(id,socket))
                 let bandInfoPromises = ids.map(id=>getInfo(id))
-                //console.log(bandInfoPromises)
                 return Promise.all([...bandMemberPromises,...bandInfoPromises])
                 .then(function(d3data){
                     insertBandInfo(d3data)
@@ -134,7 +137,6 @@ function getAutofillList(input){
                     
                     let nodesObj=buildNodes(d3data);
                     let compiledObj = {links:edgesObj,nodes:nodesObj}
-                    //socket.compress(false).emit('connectionPacket',compiledObj)
                     return(compiledObj)
                 })
             }).catch(function(error) {
@@ -143,6 +145,8 @@ function getAutofillList(input){
         }
         
         io.on('connection', function(socket){
+          
+           
             console.log('new connection')
             
             socket.on('disconnect', function(){
@@ -150,10 +154,8 @@ function getAutofillList(input){
             });
             
             socket.on('typing', function(value){
-                //console.log(value)
                 getAutofillList(value)
                 .then(function(data){
-                    //console.log(data)
                     socket.emit('updateList',data)
                 })
             })
@@ -161,7 +163,6 @@ function getAutofillList(input){
             socket.on('search', function(value){
                 getSearchList(value)
                 .then(function(data){
-                    //console.log(data)
                     socket.emit('updateList',data)
                 })
             })
@@ -185,41 +186,42 @@ function getAutofillList(input){
                     if(Object.keys(data).includes('groups')){
                         if (Object.keys(data).includes('members')){
                             console.error('anomaly')
+                            console.error(data)
                         } else {
                             console.log('person')
-                            return getConnectionsFromPerson(id)
+                            return getConnectionsFromPerson(id,socket)
                             
                         }
                     } else if (Object.keys(data).includes('members')){
                         console.log('band')
-                        return getBandMembers(id)
+                        return getBandMembers(id,socket)
                         .then( function(data){
+                            socket.emit('startTimer');
                             return (data.map(members=>members.id))
                         }
                         ).then(function(ids){
-                            let promises = ids.map(id=>getConnectionsFromPerson(id))
+                            let promises = ids.map(id=>getConnectionsFromPerson(id,socket))
                             return Promise.all(promises)
                         }).then(function(arr){
                             let links=arr.map(obj=>obj.links)
                             let nodes=arr.map(obj=>obj.nodes)
-                            console.log(links)
+                            //console.log(nodes,'links')
                             links = [].concat(...links)
                             nodes = [].concat(...nodes)
-                            
                             let uniqueNodes = Array.from(new Set(nodes.map(a => a.id)))
                             .map(id => {
                                 return nodes.find(a => a.id === id)
                             })
-                            let uniqueLinks = Array.from(new Set(links.map(a => a.id)))
-                            .map(id => {
-                                return links.find(a => a.id === id)
-                            })
+                            // let uniqueLinks = Array.from(new Set(links.map(a => a.id)))
+                            // .map(id => {
+                            //     return links.find(a => a.id === id)
+                            // })
                             
                             
                             
                             
                             
-                            let compiledObj = {links:uniqueLinks,nodes:uniqueNodes}
+                            let compiledObj = {links:links,nodes:uniqueNodes}
                             //console.log(compiledObj,'CO');
                             return compiledObj
                         })
@@ -230,8 +232,9 @@ function getAutofillList(input){
                 })
                 .then(function(data){
                     
-                    console.log(data,'final data')
+                   // console.log(data,'final data')
                     socket.emit('linksAndNodes',data)
+                    socket.emit('stopTimer')
                 })
             })
             

@@ -85,10 +85,14 @@ text {
   user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 html{
-  height:99vh;
+ width: 100%;
+  height: 100%;
+  margin: 0;
 }
 body{
-  margin: 0px;
+ width: 100%;
+  height: 100%;
+  margin: 0;
 }
 .links line {
   stroke: #999;
@@ -97,7 +101,7 @@ body{
 .nodes circle {
   stroke: #fff;
   stroke-width: 1.5px;
-  opacity: 0.8;
+ 
 }
 .sidebar {
   background-color: #282828;
@@ -112,8 +116,7 @@ body{
   color: #fff;
 }
 svg {
-  display: block;
-  margin: 0 auto;
+  margin: 0 ;
   width: 100%;
-  height:99.5vh;
+  height:100%;
 }

@@ -1,3 +1,5 @@
+/*globals io drawGraph*/
+
 // client-side js
 // run by the browser each time your view template is loaded
 var socket = io();
@@ -32,14 +34,13 @@ $('.search').on('input', function() {
     socket.emit('artistChoice',$(this).data('id'))
   })
 
-
 socket.on('updateList', function(data){
   //console.log(JSON.stringify(data))
   //console.log($('.results'))
   $('.results').html('')
   for(let idx=0;idx< data.length;idx++){
     $('.results').append(`<img class="artistImg" src="${data[idx].img}" />
-                            <li><a href="#" class="artistResult" data-id="${data[idx].id}">
+                            <li><a href="#graph" class="artistResult" data-id="${data[idx].id}">
                               ${data[idx].artist}
                             </a></li>`)
     
@@ -56,7 +57,9 @@ socket.on('linksAndNodes', function(obj){
   
 })
 
-
+socket.on('log',function(incoming){
+  console.log(incoming);
+})
 
 // listen for the form to be submitted and add a new dream when it is
 artistForm.onsubmit = function(event) {
@@ -67,3 +70,21 @@ artistForm.onsubmit = function(event) {
 
 
 };
+
+socket.on('mssg',function(str){
+          $('#log').html(str)
+          })
+
+socket.on('addTime',function(int){
+  console.log(int,$('#timeEst').html())
+          $('#timeEst').html(+($('#timeEst').html())+int);
+          })
+ var start;
+socket.on('startTimer',function(){
+   start = performance.now();
+})
+
+socket.on('stopTimer',function(){
+  var stop = performance.now();
+  console.log(stop-start)
+})

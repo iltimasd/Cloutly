@@ -13,7 +13,7 @@
     "disconnect": "^1.2.1",
     "express": "^4.16.4",
     "socket.io": "^2.2.0",
-    "bottleneck":"^2.19.1"
+    "bottleneck": "^2.19.5"
   },
   "engines": {
     "node": "8.x"

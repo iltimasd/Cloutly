@@ -44,17 +44,23 @@
       <div class="results">
       
       </div>
-    </main>
 
-    <footer>
-      Made with <a href="https://glitch.com">Glitch</a>!
-    </footer>
 
     <!-- include the Glitch button to show what the webpage is about and
           to make it easier for folks to view source and remix -->
     <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
-    
-    <svg width="960" height="600"></svg>
+    <a name="graph"></a>
+          </main>
+    <div id="log">
+      
+    </div>
+    <svg  id="graph"></svg>
+    <div id="time" style="position:fixed;bottom:10px;left:0px">
+      Estimated total time: <span id="timeEst">0</span> seconds
+    </div>
+<!--     <footer>
+      Made with <a href="https://glitch.com">Glitch</a>!
+    </footer> -->
 <script src="readyForTheFloor.js"></script>
     <script src="https://button.glitch.me/button.js"></script>
   <script src="/socket.io/socket.io.js"></script>
