@@ -1,0 +1,68 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+
+<!-- You might want to try something fancier: -->
+<!-- html/nunjucks docs: https://mozilla.github.io/nunjucks/ -->
+<!-- pug: https://pugjs.org/ -->
+<!-- haml: http://haml.info/ -->
+<!-- hbs(handlebars): http://handlebarsjs.com/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Welcome to Glitch!</title>
+    <meta name="description" content="A cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+    
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- import the webpage's client-side javascript file -->
+    <script src="/client.js" defer></script>
+
+  </head>
+  <body>
+    <header>
+      <h1>
+        These Chains Prototype
+      </h1>
+    </header>
+
+    <main>
+
+      
+      <form>
+        <input class="search" name="artist" type="text" maxlength="100" placeholder="Enter Artist" aria-labelledby="submit-artist">
+        <button type="submit" id="submit-dream">Search Artist</button>
+      </form>
+      <div class="results">
+      
+      </div>
+
+
+    <!-- include the Glitch button to show what the webpage is about and
+          to make it easier for folks to view source and remix -->
+    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+    <a name="graph"></a>
+          </main>
+    <div id="log">
+      
+    </div>
+    <svg  id="graph"></svg>
+    <div id="time" style="position:fixed;bottom:10px;left:0px">
+      Estimated total time: <span id="timeEst">0</span> seconds
+    </div>
+<!--     <footer>
+      Made with <a href="https://glitch.com">Glitch</a>!
+    </footer> -->
+<script src="readyForTheFloor.js"></script>
+    <script src="https://button.glitch.me/button.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  </body>
+</html>
